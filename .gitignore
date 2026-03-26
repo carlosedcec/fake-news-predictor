@@ -1,0 +1,3 @@
+api/.venv
+api/database
+api/ml/notebooks/X_values.pkl

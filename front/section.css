@@ -1,0 +1,8 @@
+section {
+    background-color: teal;
+    display: none;
+}
+
+body.full section {
+    display: initial;
+}

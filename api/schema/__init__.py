@@ -1,0 +1,1 @@
+from schema.news_schema import *

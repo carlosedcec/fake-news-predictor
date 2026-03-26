@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="section.css">
+
+    <title>Fake News Predictor</title>
+
+</head>
+<body class="">
+
+    <main>
+
+        <h1>Fake News Predictor</h1>
+
+        <form id="newsForm">
+            <div class="input-group">
+                <input id="title" name="title" class="input-group-item" placeholder="Head">
+                <label class="validation-message" for="title"></label>
+            </div>
+            <div class="input-group">
+                <textarea id="text" name="text" class="input-group-item" placeholder="News text"></textarea>
+                <label class="validation-message" for="textarea"></label>
+            </div>
+            <button type="submit">Predict</button>
+        </form>
+
+    </main>
+
+    <section></section>
+
+    <script src="script.js"></script>
+    
+</body>
+</html>
