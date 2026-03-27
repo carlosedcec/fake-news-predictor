@@ -22,18 +22,24 @@ function onFormSubmit(event) {
             })
             .then((data) => {
 
+                const news = data.news;
+
                 const image = document.createElement("img");
                 image.classList.add("label-image")
 
-                let imageName = Number(data.label) ? "real-news-stamp.png" : "fake-news-stamp.png";
+                let imageClass = Number(news.label) ? "real" : "fake";
+                image.classList.add(imageClass)
 
+                let imageName = Number(news.label) ? "real-news-stamp.png" : "fake-news-stamp.png";
                 image.src = "img/" + imageName;
 
                 document.querySelector("main").appendChild(image);
 
-                setTimeout(function () {
-                    image.classList.add("show");
-                }, 50);
+                setTimeout(() => image.classList.add("show"), 200);
+                setTimeout(() => {
+                    image.classList.add("hide")
+                    setTimeout(() => image.remove(), 2000);
+                }, 2000);
 
                 return data;
 
@@ -85,3 +91,9 @@ const formElements = document.querySelectorAll("#newsForm .input-group-item");
 formElements.forEach((item) => {
     item.addEventListener("change", (event) => item.classList.remove("invalid"));
 })
+
+function showNews(event) {
+    document.querySelector("body").classList.toggle("full");
+}
+
+document.getElementById("showNews").addEventListener("click", showNews);

@@ -3,26 +3,39 @@
 }
 
 body {
-    background-color: #e2e2de;
+    background-color: #dfdfd7;
     height: 100vh;
     font-family: "Merriweather";
     margin: 0px;
     display: grid;
     padding: 60px;
-    grid-template-columns: 600px;
+    grid-template-columns: 520px 0px;
     align-content: center;
     justify-content: center;
+    transition: grid-template-columns .4s ease-in-out;
 }
 
 body.full {
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 520px max(0px, calc(100vw - 120px - 520px));
 }
 
 main {
+    width: min(600px, 100%);
+    position: relative;
+    justify-self: center;
+}
+
+main .main-container {
     background: #fbfbf8;
     padding: 40px;
     border-radius: 4px;
-    box-shadow: 1px 1px 2px 0px #ccc;
+    box-shadow: 0px 1px 2px 0px #ccc;
+    position: relative;
+    z-index: 2;
+}
+
+body.full main .main-container {
+    border-radius: 4px 0px 0px 4px;
 }
 
 main h1 {
@@ -71,7 +84,7 @@ main textarea.invalid~.validation-message {
     display: block;
 }
 
-main button {
+main button[type="submit"] {
     background-color: #f1f1f1;
     height: 40px;
     border: 1px solid #e7e7e7;
@@ -80,6 +93,35 @@ main button {
     transition: .3s all ease-in-out;
 }
 
-main button:hover {
+main button[type="submit"]:hover {
     background-color: #e8e8e8;
+}
+
+button#showNews {
+    height: calc(100% - 24px);
+    background: #f1f1f1;
+    border: none;
+    border-radius: 4px;
+    padding-left: 16px;
+    padding-right: 8px;
+    position: absolute;
+    font-size: 1rem;
+    font-weight: bold;
+    font-family: "Merriweather";
+    top: 12px;
+    right: -26px;
+    box-shadow: 1px 1px 2px 0px rgba(204, 204, 204, .5);
+    cursor: pointer;
+    z-index: 0;
+    transition: .3s all ease-in-out;
+}
+
+button#showNews:hover {
+    background-color: #ebebeb;
+    transform: translateX(4px);
+}
+
+body.full button#showNews {
+    opacity: 0;
+    visibility: hidden;
 }
