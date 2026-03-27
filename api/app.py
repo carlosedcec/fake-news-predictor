@@ -67,9 +67,16 @@ def save_news_and_predict(form: NewsSchema):
     )
 
     try:
+
         session = Session()
+
+        if session.query(News).filter(News.title == form.title).first():
+            error_msg = "This news already exists in the database"
+            return { "message": error_msg }, 409
+
         session.add(news)
         session.commit()
+
         return {
             "news": {
                 "id": news.id,
@@ -78,6 +85,7 @@ def save_news_and_predict(form: NewsSchema):
                 "label": news.label,
             }
         }, 200
+
     except Exception as e:
         print(e)
         error_msg = "Não foi possível salvar a notícia"

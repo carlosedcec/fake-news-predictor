@@ -1,0 +1,14 @@
+.label-image {
+    position: fixed;
+    width: 400px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(2);
+    transition: 1s transform cubic-bezier(0.6, -0.28, 0.735, 0.045), .5s opacity ease;
+    opacity: 0;
+}
+
+.label-image.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}

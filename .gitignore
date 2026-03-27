@@ -1,3 +1,4 @@
 api/.venv
+api/activate.bat
 api/database
 api/ml/notebooks/X_values.pkl

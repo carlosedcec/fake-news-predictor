@@ -14,12 +14,32 @@ function onFormSubmit(event) {
             method: 'post',
             body: formData
         })
-            .then((response) => response.json())
-            .then((data) => {
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok)
+                    throw new Error(data.message || "Request failed");
                 return data;
             })
+            .then((data) => {
+
+                const image = document.createElement("img");
+                image.classList.add("label-image")
+
+                let imageName = Number(data.label) ? "real-news-stamp.png" : "fake-news-stamp.png";
+
+                image.src = "img/" + imageName;
+
+                document.querySelector("main").appendChild(image);
+
+                setTimeout(function () {
+                    image.classList.add("show");
+                }, 50);
+
+                return data;
+
+            })
             .catch((error) => {
-                console.error('Error:', error);
+                alert(error);
                 throw error;
             });
     }
@@ -48,11 +68,12 @@ function validateForm(form) {
         textElement.classList.add("invalid");
         textElement.nextElementSibling.innerHTML = "This field is required";
         valid = false;
-    } else if (textElement.value.length < 300) {
-        textElement.classList.add("invalid");
-        textElement.nextElementSibling.innerHTML = "The news text must be at least 300 characters long";
-        valid = false;
     }
+    // } else if (textElement.value.length < 300) {
+    //     textElement.classList.add("invalid");
+    //     textElement.nextElementSibling.innerHTML = "The news text must be at least 300 characters long";
+    //     valid = false;
+    // }
 
     return valid;
 
