@@ -4,9 +4,12 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 from model.base import Base
+from model.loader import Loader
+from model.evaluator import Evaluator
+from model.model import Model
 from model.news import News
-from model.preprocessor import PreProcessor
 from model.pipeline import Pipeline
+from model.preprocessor import PreProcessor
 
 db_path = "database/"
 

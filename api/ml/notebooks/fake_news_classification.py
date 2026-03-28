@@ -275,8 +275,8 @@ param_grid = [
 print("\nPreparing model...")
 
 # Preparação do modelo
-logistic_regression = ('LogisticREG', LogisticRegression(C=1, l1_ratio=1, solver="saga", tol=1e-3, max_iter=1000))
-model = Pipeline([tfidf, min_max_scaler, logistic_regression])
+logistic_regression = ('LogisticREG', LogisticRegression(C=1, l1_ratio=0, tol=1e-4, solver="lbfgs", max_iter=1000))
+model = Pipeline([tfidf, logistic_regression])
 model.fit(X_train, y_train)
 
 # Estimativa da acurácia no conjunto de teste
@@ -293,7 +293,7 @@ print(confusion_matrix(y_test, predictions))
 
 print("\nFinalizing model...")
 
-model = Pipeline([tfidf, min_max_scaler, logistic_regression])
+model = Pipeline([tfidf, logistic_regression])
 model.fit(X, y)
 
 print("\nDumping model pipeline...")

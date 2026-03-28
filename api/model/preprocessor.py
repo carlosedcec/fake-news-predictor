@@ -1,6 +1,7 @@
 import re
 import pickle
 import numpy as np
+import pandas as pd
 
 from sklearn.model_selection import train_test_split
 
@@ -43,12 +44,18 @@ class PreProcessor:
         Y = dados[:, -1]
         return train_test_split(X, Y, test_size=percentual_teste, random_state=seed)
     
-    def preprocess_text(self, form):
+    def preprocess_text(self, data):
         """
         Função completa para limpar e pré-processar um único documento de texto.
         Aplica todos os passos da proposta: remoção de metadados, lowering,
         remoção de pontuação/números, tokenização e remoção de stopwords.
         """
+
+        if len(data) > 1:
+            print("oi!!")
+            text = data["combined_text"]
+        else:
+            text = data.title + data.text
 
         def sanitize_text(text):
             text = re.sub(r"--.*", "", text, flags=re.DOTALL) # Remove assinaturas (começando com '-- ')
@@ -58,7 +65,6 @@ class PreProcessor:
             text = text.lower()    
             return text
 
-        text = form.title + form.text
         text = sanitize_text(text)
 
         tokens = text.split()
