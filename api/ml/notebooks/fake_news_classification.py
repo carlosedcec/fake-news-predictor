@@ -28,6 +28,9 @@ nltk.download("stopwords")
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
+import warnings
+warnings.filterwarnings("ignore")
+
 # ==============================
 # 1. LOADING DATABASE
 # ==============================
@@ -219,9 +222,9 @@ print("\nAvaliating algoritms with scaled data...")
 print("\nOptimizing hiperparameters...")
 
 random_forest_pipelines = []
-random_forest_pipelines.append(('rf-orig', Pipeline([tfidf, random_forest])))
-random_forest_pipelines.append(('rf-padr', Pipeline([tfidf, standard_scaler, random_forest])))
-random_forest_pipelines.append(('rf-norm', Pipeline([tfidf, min_max_scaler, random_forest])))
+# random_forest_pipelines.append(('rf-orig', Pipeline([tfidf, random_forest])))
+# random_forest_pipelines.append(('rf-padr', Pipeline([tfidf, standard_scaler, random_forest])))
+# random_forest_pipelines.append(('rf-norm', Pipeline([tfidf, min_max_scaler, random_forest])))
 
 param_grid = [
     {
@@ -244,13 +247,13 @@ logistic_reg_pipelines.append(('logistic_reg-norm', Pipeline([tfidf, min_max_sca
 
 param_grid = [
     {
-        'LogisticREG__penalty': ['l2'],
+        'LogisticREG__l1_ratio': [0],
         'LogisticREG__solver': ['lbfgs', 'liblinear', 'saga'],
         'LogisticREG__C': [0.1, 1, 10],
         'LogisticREG__tol': [1e-4, 1e-3]
     },
     {
-        'LogisticREG__penalty': ['l1'],
+        'LogisticREG__l1_ratio': [1],
         'LogisticREG__solver': ['liblinear', 'saga'],
         'LogisticREG__C': [0.1, 1, 10],
         'LogisticREG__tol': [1e-4, 1e-3]
@@ -272,7 +275,7 @@ param_grid = [
 print("\nPreparing model...")
 
 # Preparação do modelo
-logistic_regression = ('LogisticREG', LogisticRegression(max_iter=1000))
+logistic_regression = ('LogisticREG', LogisticRegression(C=1, l1_ratio=1, solver="saga", tol=1e-3, max_iter=1000))
 model = Pipeline([tfidf, min_max_scaler, logistic_regression])
 model.fit(X_train, y_train)
 
@@ -290,12 +293,12 @@ print(confusion_matrix(y_test, predictions))
 
 print("\nFinalizing model...")
 
-model = Pipeline([tfidf, logistic_regression])
+model = Pipeline([tfidf, min_max_scaler, logistic_regression])
 model.fit(X, y)
 
 print("\nDumping model pipeline...")
-model_name = input('\x1b[93m' + "Please enter model file name: " + '\033[0m')
-dump(model, open(f"../pipelines/{model_name}.pkl", 'wb'))
+# model_name = input('\x1b[93m' + "Please enter model file name: " + '\033[0m')
+# dump(model, open(f"../pipelines/{model_name}.pkl", 'wb'))
 print("Model pipeline dumped!")
 
 # ==============================
@@ -304,19 +307,26 @@ print("Model pipeline dumped!")
 
 print("\nTesting new data...")
 
-df = pd.read_csv('https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/teste/dados_teste.csv', sep=';', encoding='utf-8-sig')
+# Carrega csv com dados inteiramente novos
+df = pd.read_csv('https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/testdata/test_data.csv', sep=';', encoding='utf-8-sig')
+
+# Configura o csv
 df["combined_text"] = df["title"].fillna("") + " " + df["text"].fillna("")
+
+# Pré-processa os textos fazendo houldout dos dados
 X_entrada = df.progress_apply(preprocess_text, axis=1)
 
+# Faz a predição dos dados
 saidas = model.predict(X_entrada)
 
-df = pd.read_csv('https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/teste/dados_teste_labels.csv', sep=';', encoding='utf-8-sig')
+# Seta os valores de Y com as saídas esperadas
+Y_saidas_esperadas = np.array(df["label"].values, dtype=int)
+
+# Calcula a taxa de acerto
 counter = 0
-
-for idx, true_label in df["label"].items():
-    if true_label == saidas[idx]:
+for idx, label in enumerate(Y_saidas_esperadas):
+    if label == saidas[idx]:
         counter = counter + 1
-
 result_rate = (counter*100) / len(df["label"].values)
 
 print(f"Test results: {result_rate:.2f}% of correct answers")
