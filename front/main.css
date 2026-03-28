@@ -114,6 +114,8 @@ button#showNews {
     cursor: pointer;
     z-index: 0;
     transition: .3s all ease-in-out;
+    opacity: 0;
+    visibility: hidden;
 }
 
 button#showNews:hover {
@@ -121,7 +123,7 @@ button#showNews:hover {
     transform: translateX(6px);
 }
 
-body.full button#showNews {
-    opacity: 0;
-    visibility: hidden;
+button#showNews.show {
+    opacity: 1;
+    visibility: visible;
 }

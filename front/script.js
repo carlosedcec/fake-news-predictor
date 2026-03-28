@@ -1,6 +1,14 @@
 // ------------------------------
 // GET NEWS
 //-------------------------------
+function showNewsButton(show) {
+    if (show) {
+        document.getElementById("showNews").classList.add("show");
+    } else {
+        document.getElementById("showNews").classList.remove("show");
+    }
+}
+
 function getNews() {
 
     let url = 'http://127.0.0.1:5000/news';
@@ -16,9 +24,9 @@ function getNews() {
         })
         .then((data) => {
             const news = data.news;
+            const tbody = document.querySelector("table tbody");
+            tbody.innerHTML = "";
             if (news && news.length > 0 && news[0].id) {
-                const tbody = document.querySelector("table tbody");
-                tbody.innerHTML = "";
                 news.forEach((news) => {
                     const tr = document.createElement("tr");
                     tr.innerHTML += `<td><div class="cell-clamp">${news.title}</div></td>`
@@ -29,6 +37,12 @@ function getNews() {
                     tbody.appendChild(tr);
                 });
                 bindDeleteNewsEvents();
+                showNewsButton(true);
+            } else {
+                const tr = document.createElement("tr");
+                tr.innerHTML += `<td colspan="4">No news registered in the database</td>`;
+                tbody.appendChild(tr);
+                showNewsButton(false);
             }
         })
         .catch((error) => {
@@ -41,6 +55,9 @@ function getNews() {
 getNews();
 
 function deleteNews(event) {
+
+    if (!window.confirm("Are you sure you want to delete this news?"))
+        return;
 
     const newsId = this.dataset.id;
 
@@ -116,12 +133,15 @@ function onFormSubmit(event) {
 
                 setTimeout(() => {
                     image.classList.add("show");
-                    getNews();
+                    setTimeout(() => { getNews(); }, 300);
                 }, 100);
                 setTimeout(() => {
                     image.classList.add("hide")
                     setTimeout(() => image.remove(), 700);
                 }, 2000);
+
+                document.querySelectorAll("#newsForm .input-group-item").forEach(item => item.value = "");
+                document.querySelector("body").classList.add("full");
 
                 return data;
 
@@ -156,12 +176,11 @@ function validateForm(form) {
         textElement.classList.add("invalid");
         textElement.nextElementSibling.innerHTML = "This field is required";
         valid = false;
+    } else if (textElement.value.length < 300) {
+        textElement.classList.add("invalid");
+        textElement.nextElementSibling.innerHTML = "The news text must be at least 300 characters long";
+        valid = false;
     }
-    // } else if (textElement.value.length < 300) {
-    //     textElement.classList.add("invalid");
-    //     textElement.nextElementSibling.innerHTML = "The news text must be at least 300 characters long";
-    //     valid = false;
-    // }
 
     return valid;
 
