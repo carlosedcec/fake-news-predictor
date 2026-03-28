@@ -8,7 +8,7 @@ body {
     font-family: "Merriweather";
     margin: 0px;
     display: grid;
-    padding: 60px;
+    padding: 48px;
     grid-template-columns: 520px 0px;
     align-content: center;
     justify-content: center;
@@ -16,7 +16,7 @@ body {
 }
 
 body.full {
-    grid-template-columns: 520px max(0px, calc(100vw - 120px - 520px));
+    grid-template-columns: 520px max(0px, calc(100vw - 96px - 520px));
 }
 
 main {
@@ -64,7 +64,7 @@ main input {
 
 main textarea {
     resize: vertical;
-    min-height: 100px;
+    min-height: 160px;
 }
 
 main input.invalid,
@@ -103,13 +103,13 @@ button#showNews {
     border: none;
     border-radius: 4px;
     padding-left: 16px;
-    padding-right: 8px;
+    padding-right: 10px;
     position: absolute;
     font-size: 1rem;
     font-weight: bold;
     font-family: "Merriweather";
     top: 12px;
-    right: -26px;
+    right: -30px;
     box-shadow: 1px 1px 2px 0px rgba(204, 204, 204, .5);
     cursor: pointer;
     z-index: 0;
@@ -118,7 +118,7 @@ button#showNews {
 
 button#showNews:hover {
     background-color: #ebebeb;
-    transform: translateX(4px);
+    transform: translateX(6px);
 }
 
 body.full button#showNews {

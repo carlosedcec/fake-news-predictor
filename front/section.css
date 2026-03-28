@@ -1,5 +1,5 @@
 section {
-    max-height: 376px;
+    max-height: 436px;
     background-color: #f1f1f1;
     border-radius: 0px 4px 4px 0px;
     box-shadow: 0px 1px 2px 0px #ccc;
@@ -11,6 +11,7 @@ section {
     transition: opacity .25s ease;
     scrollbar-width: thin;
     scrollbar-color: #dfdfd7 #fbfbf8;
+    position: relative;
 }
 
 body.full section {
@@ -23,6 +24,7 @@ section table {
     height: 100%;
     background: #fbfbf8;
     table-layout: fixed;
+    font-size: 0.9rem;
 }
 
 section thead {
@@ -31,7 +33,7 @@ section thead {
 
 section table th,
 section table td {
-    padding: 8px;
+    padding: 10px;
     text-align: left;
     overflow: hidden;
     vertical-align: top;
@@ -48,11 +50,56 @@ section table .cell-clamp {
 }
 
 section table th:last-child,
-section table td:last-child {
+section table td:last-child,
+section table th:nth-child(3),
+section table td:nth-child(3) {
     text-align: center;
     vertical-align: middle;
 }
 
 section table tr:nth-child(2n) td {
     background-color: rgb(240, 240, 230);
+}
+
+section table td.label.label-real {
+    color: rgb(51, 117, 51);
+}
+
+section table td.label.label-fake {
+    color: rgb(136, 54, 54);
+}
+
+section table td.delete button {
+    width: 16px;
+    background: none;
+    padding: 0px;
+    border: none;
+    opacity: .45;
+    cursor: pointer;
+    transition: all .3s ease-in-out;
+}
+
+section table td.delete button:hover {
+    opacity: 1;
+}
+
+section table td.delete button img {
+    max-width: 100%;
+}
+
+section button#closeNews {
+    background: none;
+    border: none;
+    font-size: 1.05rem;
+    font-weight: bold;
+    position: absolute;
+    top: 16px;
+    right: 12px;
+    opacity: .6;
+    cursor: pointer;
+    transition: all .3s ease-in-out;
+}
+
+section button#closeNews:hover {
+    opacity: 1;
 }
