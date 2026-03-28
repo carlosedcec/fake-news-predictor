@@ -18,15 +18,17 @@ function getNews() {
             const news = data.news;
             if (news && news.length > 0 && news[0].id) {
                 const tbody = document.querySelector("table tbody");
+                tbody.innerHTML = "";
                 news.forEach((news) => {
                     const tr = document.createElement("tr");
                     tr.innerHTML += `<td><div class="cell-clamp">${news.title}</div></td>`
                     tr.innerHTML += `<td><div class="cell-clamp">${news.text}</div></td>`
                     const label = Number(news.label) ? "Real" : "Fake";
                     tr.innerHTML += `<td class="label label-${label.toLowerCase()}"><div class="cell-clamp">${label}</div></td>`
-                    tr.innerHTML += `<td class="delete"><div class="cell-clamp"><button><img src="img/trash-icon.png"></button></div></td>`
+                    tr.innerHTML += `<td class="delete-news"><div class="cell-clamp"><button data-id="${news.id}"><img src="img/trash-icon.png"></button></div></td>`
                     tbody.appendChild(tr);
                 });
+                bindDeleteNewsEvents();
             }
         })
         .catch((error) => {
@@ -37,6 +39,39 @@ function getNews() {
 }
 
 getNews();
+
+function deleteNews(event) {
+
+    const newsId = this.dataset.id;
+
+    let url = 'http://127.0.0.1:5000/news/' + newsId;
+
+    fetch(url, {
+        method: 'delete'
+    })
+        .then(async (response) => {
+            const data = await response.json();
+            if (!response.ok)
+                throw new Error(data.message || "Request failed");
+            return data;
+        })
+        .then((data) => {
+            alert(data.message);
+            getNews();
+        })
+        .catch((error) => {
+            alert(error);
+            throw error;
+        });
+
+}
+
+function bindDeleteNewsEvents() {
+    const deleteNewsButtons = document.querySelectorAll(".delete-news button");
+    deleteNewsButtons.forEach((item) => {
+        item.addEventListener("click", deleteNews);
+    });
+}
 
 // ------------------------------
 // FORM
@@ -79,10 +114,13 @@ function onFormSubmit(event) {
 
                 document.querySelector("main").appendChild(image);
 
-                setTimeout(() => image.classList.add("show"), 200);
+                setTimeout(() => {
+                    image.classList.add("show");
+                    getNews();
+                }, 100);
                 setTimeout(() => {
                     image.classList.add("hide")
-                    setTimeout(() => image.remove(), 2000);
+                    setTimeout(() => image.remove(), 700);
                 }, 2000);
 
                 return data;

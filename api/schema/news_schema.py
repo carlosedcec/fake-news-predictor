@@ -7,3 +7,8 @@ class NewsSchema(BaseModel):
     """
     title: str = "Maria"
     text: str = "Maria"
+
+class NewsIdSchema(BaseModel):
+    """ Define o parâmetro a ser passado na URL para delete
+    """
+    news_id: int

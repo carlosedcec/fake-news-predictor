@@ -69,7 +69,7 @@ section table td.label.label-fake {
     color: rgb(136, 54, 54);
 }
 
-section table td.delete button {
+section table td.delete-news button {
     width: 16px;
     background: none;
     padding: 0px;
@@ -79,11 +79,11 @@ section table td.delete button {
     transition: all .3s ease-in-out;
 }
 
-section table td.delete button:hover {
+section table td.delete-news button:hover {
     opacity: 1;
 }
 
-section table td.delete button img {
+section table td.delete-news button img {
     max-width: 100%;
 }
 

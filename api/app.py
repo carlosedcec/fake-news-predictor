@@ -22,7 +22,8 @@ def home():
 
 @app.get("/news")
 def get_pacientes():
-    """Lista todos as notícias cadastradas na base"""
+    """Lista todos as notícias cadastradas na base
+    """
 
     session = Session()
     news = session.query(News).all()
@@ -45,7 +46,8 @@ def get_pacientes():
 
 @app.post("/news")
 def save_news_and_predict(form: NewsSchema):
-    """Adiciona uma nova notícia à base de dados"""
+    """Adiciona uma nova notícia à base de dados
+    """
 
     preprocessor = PreProcessor()
     pipeline = Pipeline()
@@ -88,9 +90,27 @@ def save_news_and_predict(form: NewsSchema):
 
     except Exception as e:
         print(e)
-        error_msg = "Não foi possível salvar a notícia"
+        error_msg = "Error trying to save the news on the database"
         return { "message": error_msg }, 400
 
+@app.delete("/news/<int:news_id>")
+def delete_paciente(path: NewsIdSchema):
+    """Remove uma notícia cadastrado na base a partir do id
+    """
+
+    session = Session()
+
+    news = (
+        session.query(News)
+        .filter(News.id == path.news_id).first()
+    )
+
+    if not news:
+        return { "message": "News item not found in the database" }, 404
+    else:
+        session.delete(news)
+        session.commit()
+        return { "message": "News removed successfully" }, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
