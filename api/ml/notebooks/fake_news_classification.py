@@ -1,39 +1,49 @@
+# ==============================
+# 1. IMPORTS
+# ==============================
+
+# Configuração para não exibir os warnings
+import warnings
+warnings.filterwarnings("ignore")
+
+# Imports gerais
 import re
-import sys
 import numpy as np
 import pandas as pd
-from tqdm.auto import tqdm
-from pickle import dump, load
+from pickle import dump
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+# Imports do scikit-learn
+from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MaxAbsScaler
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix
 
+# Bibliotecas para manipulação de texto e NLP
 import nltk
+from tqdm.auto import tqdm
 from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
 
+# Bloco de configuração inicial do NLTK
 nltk.download("punkt")
 nltk.download("stopwords")
 nltk.download("wordnet")
 nltk.download("omw-1.4")
 
-import warnings
-warnings.filterwarnings("ignore")
+# ==============================
+# 2. LOADING DATABASE
+# ==============================
 
-# ==============================
-# 1. LOADING DATABASE
-# ==============================
 # Função que configura e padroniza os diferentes csvs, retornando um data frame
 def create_data_frame_from_files(datasets):
 
@@ -65,8 +75,7 @@ def create_data_frame_from_files(datasets):
 datasets = [
     'https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/aadyasingh55-fake-news-classification/evaluation.csv',
     'https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/aadyasingh55-fake-news-classification/test%20(1).csv',
-    'https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/aadyasingh55-fake-news-classification/train%20(2).csv',
-    'https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/mahdimashayekhi-fake-news-detection-dataset/fake_news_dataset.csv'
+    'https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/aadyasingh55-fake-news-classification/train%20(2).csv'
 ]
 
 print("Loading data...")
@@ -74,8 +83,10 @@ df = create_data_frame_from_files(datasets)
 print("Data loaded!\n")
 
 # ==============================
-# 2. PROCESSING DATA
+# 3. PREPROCESSING DATA
 # ==============================
+
+# Função para pré-processar o texto
 def preprocess_text(row) -> str:
     """
     Função completa para limpar e pré-processar um único documento de texto.
@@ -90,7 +101,7 @@ def preprocess_text(row) -> str:
         text = re.sub(r">.*", "", text) # Remove linhas de citação (começando com '>')
         text = re.sub(r"\S*@\S*\s?", "", text) # Remove emails
         text = re.sub(r"\s+", " ", text).strip() # Remove quebras de linha e tabs
-        text = text.lower()    
+        text = text.lower()
         return text
 
     text = sanitize_text(text)
@@ -117,13 +128,16 @@ print("Text preprocessed!\n")
 y = np.array(df["label"].values, dtype=int)
 
 # ==============================
-# 3. TRAIN/TEST SPLIT
+# 4. TRAIN/TEST SPLIT
 # ==============================
+
+# Seta variáveis de configuração
 SEED = 7
 TEST_SIZE = 0.20
 SCORING = 'f1_macro'
 NUM_PARTICOES = 5
 
+# Separa dados em treino e teste com estratificação
 print("Splitting data into train and test...")
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=TEST_SIZE, shuffle=True, random_state=SEED, stratify=y
@@ -134,10 +148,8 @@ print(f"Training set: {X_train.shape[0]} samples")
 print(f"Test set: {X_test.shape[0]} samples\n")
 
 # ==============================
-# 4. MODEL AVALIATION
+# 5. MODEL AVALIATION
 # ==============================
-
-msgs = []
 
 # Algoritmos que serão utilizados
 knn = ('KNN', KNeighborsClassifier())
@@ -145,7 +157,7 @@ random_forest = ('RF', RandomForestClassifier(random_state=SEED))
 naive_bayes = ('NB', MultinomialNB())
 logistic_regression = ('LogisticREG', LogisticRegression(max_iter=1000))
 
-# tfid piplein
+# tfid pipeline
 tfidf = ('tfidf', TfidfVectorizer(min_df=2, max_df=0.9))
 
 # Lista que armazenará os modelos
@@ -164,7 +176,7 @@ results = []
 # Fold e Estratificação
 kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
 
-print("Avaliating algoritms...")
+print("Avaliating algorithms...")
 
 # Avaliação dos modelos
 # for name, model in models:
@@ -172,12 +184,12 @@ print("Avaliating algoritms...")
 #     names.append(name)
 #     results.append(cv_results)
 #     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-#     msgs.append(msg)
 #     print(msg)
 
 # ==============================
-# 5. MODEL AVALIATION WITH SCALER
+# 6. MODEL AVALIATION WITH SCALER
 # ==============================
+
 names = []
 results = []
 pipelines = []
@@ -204,7 +216,7 @@ pipelines.append(('RF-norm', Pipeline([tfidf, min_max_scaler, random_forest])))
 pipelines.append(('NB-norm', Pipeline([tfidf, min_max_scaler, naive_bayes])))
 pipelines.append(('LogisticREG-norm', Pipeline([tfidf, min_max_scaler, logistic_regression])))
 
-print("\nAvaliating algoritms with scaled data...")
+print("\nAvaliating algorihtms with scaled data...")
 
 # Executando os pipelines
 # for name, model in pipelines:
@@ -212,19 +224,21 @@ print("\nAvaliating algoritms with scaled data...")
 #     names.append(name)
 #     results.append(cv_results)
 #     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-#     msgs.append(msg)
 #     print(msg)
 
 # ==============================
-# 6. OTIMIZAÇÃO DE HIPERPARÂMETROS
+# 7. HIPERPARAMETERS OPTIMIZATION
 # ==============================
 
 print("\nOptimizing hiperparameters...")
 
+msgs = []
+
+# Testando otimização de hiperparâmetros da Random Forest
 random_forest_pipelines = []
-# random_forest_pipelines.append(('rf-orig', Pipeline([tfidf, random_forest])))
-# random_forest_pipelines.append(('rf-padr', Pipeline([tfidf, standard_scaler, random_forest])))
-# random_forest_pipelines.append(('rf-norm', Pipeline([tfidf, min_max_scaler, random_forest])))
+random_forest_pipelines.append(('rf-orig', Pipeline([tfidf, random_forest])))
+random_forest_pipelines.append(('rf-padr', Pipeline([tfidf, standard_scaler, random_forest])))
+random_forest_pipelines.append(('rf-norm', Pipeline([tfidf, min_max_scaler, random_forest])))
 
 param_grid = [
     {
@@ -236,10 +250,13 @@ param_grid = [
 ]
 
 # for name, model in random_forest_pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=6, verbose=0)
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=6, verbose=3)
 #     grid.fit(X_train, y_train)
-#     msgs.append("Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_))
+#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
+#     print(msg)
+#     msgs.append(msg)
 
+# Testando otimização de hiperparâmetros da Logistic Regression
 logistic_reg_pipelines = []
 logistic_reg_pipelines.append(('logistic_reg-orig', Pipeline([tfidf, logistic_regression])))
 logistic_reg_pipelines.append(('logistic_reg-padr', Pipeline([tfidf, standard_scaler, logistic_regression])))
@@ -263,38 +280,47 @@ param_grid = [
 # for name, model in logistic_reg_pipelines:
 #     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=6, verbose=3)
 #     grid.fit(X_train, y_train)
-#     msgs.append("Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_))
-
-# for msg in msgs:
+#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
 #     print(msg)
+#     msgs.append(msg)
+
+for msg in msgs:
+    print(msg)
 
 # ==============================
-# 7. MODEL PREPARATION
+# 8. MODEL PREPARATION
 # ==============================
 
 print("\nPreparing model...")
 
-# Preparação do modelo
-logistic_regression = ('LogisticREG', LogisticRegression(C=1, l1_ratio=0, tol=1e-4, solver="lbfgs", max_iter=1000))
+# Preparando o modelo
+logistic_regression = ('LogisticREG', LogisticRegression(max_iter=1000))
 model = Pipeline([tfidf, logistic_regression])
 model.fit(X_train, y_train)
 
 # Estimativa da acurácia no conjunto de teste
 predictions = model.predict(X_test)
-print(f"Accuracy: {accuracy_score(y_test, predictions):.6f}")
-print("Classification report:")
+
+print(f"\nAccuracy: {accuracy_score(y_test, predictions):.3f}")
+
+print("\nClassification report:")
 print(classification_report(y_test, predictions, digits=3))
-print("Confusion matrix:")
+
+print("\nConfusion matrix:")
 print(confusion_matrix(y_test, predictions))
 
 # ==============================
-# 8. MODEL FINALIZATION
+# 9. MODEL FINALIZATION
 # ==============================
 
 print("\nFinalizing model...")
-
 model = Pipeline([tfidf, logistic_regression])
 model.fit(X, y)
+print("Model finalized!")
+
+# ==============================
+# 10. MODEL DUMP
+# ==============================
 
 print("\nDumping model pipeline...")
 # model_name = input('\x1b[93m' + "Please enter model file name: " + '\033[0m')
@@ -302,7 +328,7 @@ print("\nDumping model pipeline...")
 print("Model pipeline dumped!")
 
 # ==============================
-# 9. TESTING NEW DATA
+# 11. TESTING NEW DATA
 # ==============================
 
 print("\nTesting new data...")
@@ -318,6 +344,7 @@ X_entrada = df.progress_apply(preprocess_text, axis=1)
 
 # Faz a predição dos dados
 saidas = model.predict(X_entrada)
+print(saidas)
 
 # Seta os valores de Y com as saídas esperadas
 Y_saidas_esperadas = np.array(df["label"].values, dtype=int)

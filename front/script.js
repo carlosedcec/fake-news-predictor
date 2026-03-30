@@ -118,7 +118,7 @@ function onFormSubmit(event) {
             })
             .then((data) => {
 
-                const news = data.news;
+                const news = data;
 
                 const image = document.createElement("img");
                 image.classList.add("label-image")

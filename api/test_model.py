@@ -2,8 +2,6 @@ from model import *
 import numpy as np
 from tqdm.auto import tqdm
 
-# To run: pytest -v test_modelos.py
-
 # Instanciação das Classes
 loader = Loader()
 model = Model()
@@ -24,15 +22,11 @@ y = np.array(df["label"].values, dtype=int)
 def test_modelo_lr():
 
     # Importando pipeline de Logistic Regression
-    lr_path = './ml/pipelines/fake_news_classification_pipeline.pkl'
+    lr_path = './ml/pipelines/fake_news_classification_pipeline_lr.pkl'
     rf_model = pipeline.carrega_pipeline(lr_path)
 
     # Obtendo as métricas de Logistic Regression
     acuracia_rf = evaluator.evaluate(rf_model, X, y)
     
     # Testando as métricas de Logistic Regression
-    # Modifique as métricas de acordo com seus requisitos
-    assert acuracia_rf >= 0.65
-    # assert recall_rf >= 0.5 
-    # assert precisao_rf >= 0.5 
-    # assert f1_rf >= 0.5
+    assert acuracia_rf >= 0.72

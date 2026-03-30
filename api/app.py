@@ -31,7 +31,6 @@ def get_pacientes():
     if not news:
         return { "news": [] }, 200
     else:
-        print(news)
         return {
             "news": [
                 {
@@ -55,9 +54,21 @@ def save_news_and_predict(form: NewsSchema):
     title = form.title
     text = form.text
 
+    if not title:
+        error_msg = "Title field is required"
+        return { "message": error_msg }, 422
+
+    if not text:
+        error_msg = "Text field is required"
+        return { "message": error_msg }, 422
+
+    if len(text) < 300:
+        error_msg = "The news text must be at least 300 characters long"
+        return { "message": error_msg }, 422
+
     X_input = [preprocessor.preprocess_text(form)]
 
-    pipeline_path = "./ml/pipelines/fake_news_classification_pipeline.pkl"
+    pipeline_path = "./ml/pipelines/fake_news_classification_pipeline_lr.pkl"
     model_pipeline = pipeline.carrega_pipeline(pipeline_path)
 
     label = int(model_pipeline.predict(X_input)[0])
@@ -80,12 +91,10 @@ def save_news_and_predict(form: NewsSchema):
         session.commit()
 
         return {
-            "news": {
-                "id": news.id,
-                "title": news.title,
-                "text": news.text,
-                "label": news.label,
-            }
+            "id": news.id,
+            "title": news.title,
+            "text": news.text,
+            "label": news.label
         }, 200
 
     except Exception as e:

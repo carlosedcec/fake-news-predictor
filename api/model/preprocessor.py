@@ -1,4 +1,5 @@
 import re
+import math
 import pickle
 import numpy as np
 import pandas as pd
@@ -51,11 +52,20 @@ class PreProcessor:
         remoção de pontuação/números, tokenização e remoção de stopwords.
         """
 
-        if len(data) > 1:
-            print("oi!!")
-            text = data["combined_text"]
-        else:
-            text = data.title + data.text
+        def _text_part(value):
+            if value is None: return ""
+            if isinstance(value, float) and math.isnan(value): return ""
+            if pd.isna(value): return ""
+            return str(value)
+
+        if isinstance(data, str):
+            text = data
+        elif hasattr(data, "title") or hasattr(data, "text"):
+            _title = _text_part(getattr(data, "title", None))
+            _text = _text_part(getattr(data, "text", None))
+            text = f"{_title} {_text}".strip()
+        elif hasattr(data, "combined_text"):
+            text = data.combined_text.strip()
 
         def sanitize_text(text):
             text = re.sub(r"--.*", "", text, flags=re.DOTALL) # Remove assinaturas (começando com '-- ')
