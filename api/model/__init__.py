@@ -1,7 +1,7 @@
 import os
-from sqlalchemy_utils import database_exists, create_database
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import database_exists, create_database
 
 from model.base import Base
 from model.loader import Loader

@@ -1,29 +1,42 @@
-import json
-import numpy as np
 from flask import redirect
 from flask_openapi3 import OpenAPI, Info, Tag
-# from urllib.parse import unquote
-from sqlalchemy.exc import IntegrityError
 
 from model import *
-# from logger import logger
 from schema import *
 from flask_cors import CORS
 
 info = Info(title="Minha API", version="1.0.0")
-app = OpenAPI(
-    __name__, info=info, static_folder="../front", static_url_path="/front"
-)
+app = OpenAPI(__name__, info=info, static_folder="../front", static_url_path="/front")
 CORS(app)
 
-@app.get("/")
+home_tag = Tag(
+    name="Home",
+    description="Home page",
+)
+docs_tag = Tag(
+    name="Documentation",
+    description="Documentation selection",
+)
+news_tag = Tag(
+    name="News",
+    description="Addition, visualization, removal and prediction of news",
+)
+
+@app.get("/", tags=[home_tag])
 def home():
     return redirect("/front/index.html")
 
-@app.get("/news")
-def get_pacientes():
-    """Lista todos as notícias cadastradas na base
-    """
+@app.get("/docs", tags=[docs_tag])
+def docs():
+    return redirect("/openapi")
+
+@app.get(
+    "/news",
+    tags=[news_tag],
+    responses={"200": NewsListSchema, "404": ErrorSchema},
+)
+def get_news():
+    """Lists all news registered in the database"""
 
     session = Session()
     news = session.query(News).all()
@@ -43,10 +56,13 @@ def get_pacientes():
             ]
         }, 200
 
-@app.post("/news")
+@app.post(
+    "/news",
+    tags=[news_tag],
+    responses={"200": NewsViewSchema, "404": ErrorSchema},
+)
 def save_news_and_predict(form: NewsSchema):
-    """Adiciona uma nova notícia à base de dados
-    """
+    """Adds a new news to the database"""
 
     preprocessor = PreProcessor()
     pipeline = Pipeline()
@@ -61,6 +77,8 @@ def save_news_and_predict(form: NewsSchema):
     if not text:
         error_msg = "Text field is required"
         return { "message": error_msg }, 422
+
+    print(text)
 
     if len(text) < 300:
         error_msg = "The news text must be at least 300 characters long"
@@ -102,10 +120,13 @@ def save_news_and_predict(form: NewsSchema):
         error_msg = "Error trying to save the news on the database"
         return { "message": error_msg }, 400
 
-@app.delete("/news/<int:news_id>")
-def delete_paciente(path: NewsIdSchema):
-    """Remove uma notícia cadastrado na base a partir do id
-    """
+@app.delete(
+    "/news/<int:news_id>",
+    tags=[news_tag],
+    responses={"200": NewsRemovedSuccessfulSchema, "404": ErrorSchema},
+)
+def delete_news(path: NewsIdSchema):
+    """Remove a news from the database using the id"""
 
     session = Session()
 

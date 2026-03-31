@@ -13,18 +13,18 @@ import pandas as pd
 from pickle import dump
 
 # Imports do scikit-learn
-from sklearn.preprocessing import StandardScaler
-from sklearn.preprocessing import MaxAbsScaler
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import StratifiedKFold
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import GridSearchCV
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.linear_model import LogisticRegression
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MaxAbsScaler
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import classification_report, confusion_matrix
 
@@ -32,7 +32,6 @@ from sklearn.metrics import classification_report, confusion_matrix
 import nltk
 from tqdm.auto import tqdm
 from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
 
 # Bloco de configuração inicial do NLTK
 nltk.download("punkt")
@@ -41,7 +40,7 @@ nltk.download("wordnet")
 nltk.download("omw-1.4")
 
 # ==============================
-# 2. LOADING DATABASE
+# 2. LOADING DATA
 # ==============================
 
 # Função que configura e padroniza os diferentes csvs, retornando um data frame
@@ -123,7 +122,6 @@ tqdm.pandas(desc="Preprocessing")
 
 print("Preprocessing text...")
 X = df.progress_apply(preprocess_text, axis=1)
-# X = load(open("X_values.pkl", 'rb'))
 print("Text preprocessed!\n")
 y = np.array(df["label"].values, dtype=int)
 
@@ -190,8 +188,11 @@ print("Avaliating algorithms...")
 # 6. MODEL AVALIATION WITH SCALER
 # ==============================
 
+# Listas para armazenar os resultados
 names = []
 results = []
+
+# Lista que armazenará as pipelines
 pipelines = []
 
 # Transformações que serão utilizadas
@@ -232,8 +233,6 @@ print("\nAvaliating algorihtms with scaled data...")
 
 print("\nOptimizing hiperparameters...")
 
-msgs = []
-
 # Testando otimização de hiperparâmetros da Random Forest
 random_forest_pipelines = []
 random_forest_pipelines.append(('rf-orig', Pipeline([tfidf, random_forest])))
@@ -250,11 +249,10 @@ param_grid = [
 ]
 
 # for name, model in random_forest_pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=6, verbose=3)
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
 #     grid.fit(X_train, y_train)
 #     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
 #     print(msg)
-#     msgs.append(msg)
 
 # Testando otimização de hiperparâmetros da Logistic Regression
 logistic_reg_pipelines = []
@@ -278,14 +276,10 @@ param_grid = [
 ]
 
 # for name, model in logistic_reg_pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=6, verbose=3)
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
 #     grid.fit(X_train, y_train)
 #     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
 #     print(msg)
-#     msgs.append(msg)
-
-for msg in msgs:
-    print(msg)
 
 # ==============================
 # 8. MODEL PREPARATION
@@ -300,12 +294,13 @@ model.fit(X_train, y_train)
 
 # Estimativa da acurácia no conjunto de teste
 predictions = model.predict(X_test)
-
 print(f"\nAccuracy: {accuracy_score(y_test, predictions):.3f}")
 
+# Relatório de métricas
 print("\nClassification report:")
 print(classification_report(y_test, predictions, digits=3))
 
+# Matriz de confusão
 print("\nConfusion matrix:")
 print(confusion_matrix(y_test, predictions))
 

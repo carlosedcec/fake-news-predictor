@@ -5,14 +5,14 @@ from model import Session, News
 
 @pytest.fixture
 def client():
-    """Configura o cliente de teste para a aplicação Flask"""
+    """Configure test client for Flask application"""
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
 
 @pytest.fixture
 def sample_news_data():
-    """Dados de exemplo para teste de notícia"""
+    """Example data for news test"""
 
     data = {
         "title": "Thousands of ‘No Kings’ protesters gather at Portland’s Waterfront Park",
@@ -21,7 +21,7 @@ def sample_news_data():
 
     yield data
 
-    # Primeiro, limpa qualquer notícia existente com o mesmo nome
+    # Clean the news of the database after each test
     session = Session()
     existing_news = session.query(News).filter(News.title == data['title']).first()
     if existing_news:
@@ -30,19 +30,19 @@ def sample_news_data():
     session.close()
 
 def test_home_redirect(client):
-    """Testa se a rota home redireciona para o frontend"""
+    """Tests if the home route redirects to the frontend"""
     response = client.get('/')
     assert response.status_code == 302
     assert '/front/index.html' in response.location
 
-# def test_docs_redirect(client):
-#     """Testa se a rota docs redireciona para openapi"""
-#     response = client.get('/docs')
-#     assert response.status_code == 302
-#     assert '/openapi' in response.location
+def test_docs_redirect(client):
+    """Test if the docs route redirects to openapi"""
+    response = client.get('/docs')
+    assert response.status_code == 302
+    assert '/openapi' in response.location
 
 def test_get_news_empty(client):
-    """Testa a listagem de notícias quando não há nenhuma"""
+    """Test the news listing when there are none"""
     response = client.get('/news')
     assert response.status_code == 200
     data = json.loads(response.data)
@@ -50,29 +50,28 @@ def test_get_news_empty(client):
     assert isinstance(data['news'], list)
 
 def test_add_news_prediction(client, sample_news_data):
-    """Testa a adição de uma notícia com predição"""
+    """Test adding a news with prediction"""
 
-    # Teste de adição
+    # Adds news to the database
     response = client.post('/news', data=sample_news_data)
-    
     assert response.status_code == 200
     data = json.loads(response.data)
 
-    # Verifica se o notícia foi criado com todas as informações
+    # Checks if the news was properly created
     assert data['title'] == sample_news_data['title']
     assert data['text'] == sample_news_data['text']
 
-    # Verifica se a predição foi feita (label deve estar presente)
+    # Checks if the prediction was done correctly (label field must be present)
     assert 'label' in data
     assert data['label'] in [0, 1]
 
 def test_add_duplicate_news(client, sample_news_data):
-    """Testa a adição de uma notícia duplicadoa"""
+    """Test adding a duplicate news"""
 
-    # Primeiro adiciona a notícia
+    # First of all, adds the news
     client.post('/news', data=sample_news_data)
     
-    # Tenta adicionar novamente
+    # Then, tries to add again
     response = client.post('/news', data=sample_news_data)
     
     assert response.status_code == 409
@@ -81,10 +80,10 @@ def test_add_duplicate_news(client, sample_news_data):
     assert 'already exists' in data['message']
 
 def test_add_invalid_news(client, sample_news_data):
-    """Testa a adição de uma notícia com campos inválidos"""
+    """Tests adding a news with invalid fields"""
 
-    # Cria notícia com campos vazios
-    news = { "text": "", "title": "" }
+    # Creates a news item with empty fields
+    news = { "title": "", "text": "" }
     
     response = client.post('/news', data=news)
     
@@ -93,8 +92,8 @@ def test_add_invalid_news(client, sample_news_data):
     assert 'message' in data
     assert 'field is required' in data['message']
 
-    # Cria notícia com texto de tamanho insuficiente
-    news = { "text": "Teste", "title": "Teste" }
+    # Creates a news item with a short length text field
+    news = { "title": "Teste", "text": "Teste" }
     
     response = client.post('/news', data=news)
     
@@ -104,14 +103,13 @@ def test_add_invalid_news(client, sample_news_data):
     assert 'must be at least 300 characters long' in data['message']
 
 def test_delete_news(client, sample_news_data):
-    """Testa a remoção de um ´notícia"""
+    """Tests news deletion"""
 
-
-    # Adiciona o notícia
+    # Adds the news
     response = client.post('/news', data=sample_news_data)
     data = json.loads(response.data)
 
-    # Remove a notícia
+    # Delete it
     response = client.delete(f'/news/{data["id"]}')
     assert response.status_code == 200
     data = json.loads(response.data)
@@ -119,24 +117,8 @@ def test_delete_news(client, sample_news_data):
     assert 'removed successfully' in data['message']
 
 def test_delete_nonexistent_news(client):
-    """Testa a remoção de uma notícia que não existe"""
+    """Tests the deletion of a non existing news"""
     response = client.delete('/news/999999999999999')
     assert response.status_code == 404
     data = json.loads(response.data)
     assert 'message' in data
-
-def cleanup_test_news():
-    """Limpa notícia de teste do banco"""
-
-    session = Session()
-    test_news = session.query(News).filter(News.title.like("%No Kings%")).all()
-
-    for news in test_news:
-        session.delete(news)
-    session.commit()
-    session.close()
-
-# Executa limpeza após os testes
-def test_cleanup():
-    """Limpa dados de teste"""
-    cleanup_test_news()

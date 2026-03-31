@@ -3,24 +3,20 @@ import pickle
 class Model:
     
     def __init__(self):
-        """Inicializa o modelo"""
+        """Initializes the model"""
         self.model = None
     
-    def carrega_modelo(self, path):
-        """Dependendo se o final for .pkl ou .joblib, carregamos de uma forma ou de outra
-        """
-
+    def load_model(self, path):
         if path.endswith('.pkl'):
             with open(path, 'rb') as file:
                 self.model = pickle.load(file)
         else:
-            raise Exception('Formato de arquivo não suportado')
+            raise Exception('File format not supported')
         return self.model
     
     def preditor(self, X_input):
-        """Realiza a predição de uma notícia com base no modelo treinado
-        """
+        """Performs a news prediction based on the trained model"""
         if self.model is None:
-            raise Exception('Modelo não foi carregado. Use carrega_modelo() primeiro.')
+            raise Exception('The model was not loaded. Use load_model() first')
         label = self.model.predict(X_input)
         return label
