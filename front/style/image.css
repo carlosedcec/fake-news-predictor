@@ -4,7 +4,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(2);
-    transition: transform .8s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity .6s ease;
+    transition: transform .6s cubic-bezier(0.6, -0.28, 0.735, 0.045), opacity .4s ease;
     opacity: 0;
     z-index: 99;
     pointer-events: none;

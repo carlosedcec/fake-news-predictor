@@ -54,44 +54,15 @@ function getNews() {
 
 getNews();
 
-function deleteNews(event) {
+// ------------------------------
+// SHOW/CLOSE NEWS
+//-------------------------------
 
-    if (!window.confirm("Are you sure you want to delete this news?"))
-        return;
-
-    const newsId = this.dataset.id;
-
-    let url = 'http://127.0.0.1:5000/news/' + newsId;
-
-    fetch(url, {
-        method: 'delete'
-    })
-        .then(async (response) => {
-            const data = await response.json();
-            if (!response.ok)
-                throw new Error(data.message || "Request failed");
-            return data;
-        })
-        .then((data) => {
-            alert(data.message);
-            getNews();
-        })
-        .catch((error) => {
-            alert(error);
-            throw error;
-        });
-
-}
-
-function bindDeleteNewsEvents() {
-    const deleteNewsButtons = document.querySelectorAll(".delete-news button");
-    deleteNewsButtons.forEach((item) => {
-        item.addEventListener("click", deleteNews);
-    });
-}
+document.getElementById("showNews").addEventListener("click", () => document.querySelector("body").classList.add("full"));
+document.getElementById("closeNews").addEventListener("click", () => document.querySelector("body").classList.remove("full"));
 
 // ------------------------------
-// FORM
+// ADD NEWS
 //-------------------------------
 
 function onFormSubmit(event) {
@@ -137,8 +108,8 @@ function onFormSubmit(event) {
                 }, 100);
                 setTimeout(() => {
                     image.classList.add("hide")
-                    setTimeout(() => image.remove(), 700);
-                }, 2000);
+                    setTimeout(() => image.remove(), 600);
+                }, 1700);
 
                 document.querySelectorAll("#newsForm .input-group-item").forEach(item => item.value = "");
                 document.querySelector("body").classList.add("full");
@@ -194,8 +165,41 @@ formElements.forEach((item) => {
 })
 
 // ------------------------------
-// SHOW/CLOSE NEWS
+// DELETE NEWS
 //-------------------------------
 
-document.getElementById("showNews").addEventListener("click", () => document.querySelector("body").classList.add("full"));
-document.getElementById("closeNews").addEventListener("click", () => document.querySelector("body").classList.remove("full"));
+function deleteNews(event) {
+
+    if (!window.confirm("Are you sure you want to delete this news?"))
+        return;
+
+    const newsId = this.dataset.id;
+
+    let url = 'http://127.0.0.1:5000/news/' + newsId;
+
+    fetch(url, {
+        method: 'delete'
+    })
+        .then(async (response) => {
+            const data = await response.json();
+            if (!response.ok)
+                throw new Error(data.message || "Request failed");
+            return data;
+        })
+        .then((data) => {
+            alert(data.message);
+            getNews();
+        })
+        .catch((error) => {
+            alert(error);
+            throw error;
+        });
+
+}
+
+function bindDeleteNewsEvents() {
+    const deleteNewsButtons = document.querySelectorAll(".delete-news button");
+    deleteNewsButtons.forEach((item) => {
+        item.addEventListener("click", deleteNews);
+    });
+}
