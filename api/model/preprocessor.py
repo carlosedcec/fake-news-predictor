@@ -4,11 +4,16 @@ import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 
-nltk.download("punkt")
-nltk.download("stopwords")
-nltk.download("wordnet")
-nltk.download("omw-1.4")
+def ensure_nltk_resource(resource_name, find_path):
+    try:
+        nltk.data.find(find_path)
+    except LookupError:
+        nltk.download(resource_name, quiet=True)
 
+ensure_nltk_resource("punkt", "tokenizers/punkt")
+ensure_nltk_resource("stopwords", "corpora/stopwords")
+ensure_nltk_resource("wordnet", "corpora/wordnet")
+ensure_nltk_resource("omw-1.4", "corpora/omw-1.4")
 
 class PreProcessor:
 

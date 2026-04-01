@@ -36,10 +36,16 @@ from tqdm.auto import tqdm
 from nltk.corpus import stopwords
 
 # Bloco de configuração inicial do NLTK
-nltk.download("punkt")
-nltk.download("stopwords")
-nltk.download("wordnet")
-nltk.download("omw-1.4")
+def ensure_nltk_resource(resource_name, find_path):
+    try:
+        nltk.data.find(find_path)
+    except LookupError:
+        nltk.download(resource_name, quiet=True)
+
+ensure_nltk_resource("punkt", "tokenizers/punkt")
+ensure_nltk_resource("stopwords", "corpora/stopwords")
+ensure_nltk_resource("wordnet", "corpora/wordnet")
+ensure_nltk_resource("omw-1.4", "corpora/omw-1.4")
 
 csv.field_size_limit(sys.maxsize)
 
@@ -153,6 +159,9 @@ print(f"Test set: {X_test.shape[0]} samples\n")
 # 5. MODEL AVALIATION
 # ==============================
 
+# Definindo uma semente global
+np.random.seed(SEED)
+
 # Algoritmos que serão utilizados
 knn = ('KNN', KNeighborsClassifier())
 random_forest = ('RF', RandomForestClassifier(random_state=SEED))
@@ -181,12 +190,12 @@ kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
 print("Avaliating algorithms...")
 
 # Avaliação dos modelos
-for name, model in models:
-    cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING)
-    names.append(name)
-    results.append(cv_results)
-    msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-    print(msg)
+# for name, model in models:
+#     cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING)
+#     names.append(name)
+#     results.append(cv_results)
+#     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
+#     print(msg)
 
 # ==============================
 # 6. MODEL AVALIATION WITH SCALER
@@ -224,12 +233,12 @@ pipelines.append(('LogisticREG-norm', Pipeline([tfidf, min_max_scaler, logistic_
 print("\nAvaliating algorihtms with scaled data...")
 
 # Executando os pipelines
-for name, model in pipelines:
-    cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING, n_jobs=4)
-    names.append(name)
-    results.append(cv_results)
-    msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-    print(msg)
+# for name, model in pipelines:
+#     cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING, n_jobs=4)
+#     names.append(name)
+#     results.append(cv_results)
+#     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
+#     print(msg)
 
 # ==============================
 # 7. HIPERPARAMETERS OPTIMIZATION
@@ -252,11 +261,11 @@ param_grid = [
     }
 ]
 
-for name, model in random_forest_pipelines:
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
-    grid.fit(X_train, y_train)
-    msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
-    print(msg)
+# for name, model in random_forest_pipelines:
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
+#     grid.fit(X_train, y_train)
+#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
+#     print(msg)
 
 # Testando otimização de hiperparâmetros da Logistic Regression
 logistic_reg_pipelines = []
@@ -279,11 +288,11 @@ param_grid = [
     }
 ]
 
-for name, model in logistic_reg_pipelines:
-    grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
-    grid.fit(X_train, y_train)
-    msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
-    print(msg)
+# for name, model in logistic_reg_pipelines:
+#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
+#     grid.fit(X_train, y_train)
+#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
+#     print(msg)
 
 # ==============================
 # 8. MODEL PREPARATION
@@ -322,8 +331,8 @@ print("Model finalized!")
 # ==============================
 
 print("\nDumping model pipeline...")
-# model_name = input('\x1b[93m' + "Please enter model file name: " + '\033[0m')
-# dump(model, open(f"../pipelines/{model_name}.pkl", 'wb'))
+model_name = input('\x1b[93m' + "Please enter model file name: " + '\033[0m')
+dump(model, open(f"../pipelines/{model_name}.pkl", 'wb'))
 print("Model pipeline dumped!")
 
 # ==============================
@@ -333,7 +342,7 @@ print("Model pipeline dumped!")
 print("\nTesting new data...")
 
 # Carrega csv com dados inteiramente novos
-df = pd.read_csv('https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/testdata/test_data.csv', sep=';', encoding='utf-8-sig')
+df = pd.read_csv('../data/testdata/test_data.csv', sep=';', encoding='utf-8-sig')
 
 # Configura o csv
 df["combined_text"] = df["title"].fillna("") + " " + df["text"].fillna("")

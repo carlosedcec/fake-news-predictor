@@ -29,4 +29,4 @@ def test_modelo_lr():
     acuracia_rf = evaluator.evaluate(rf_model, X, y)
     
     # Tests the metrics rate
-    assert acuracia_rf >= 0.72
+    assert acuracia_rf >= 0.75
