@@ -5,7 +5,7 @@ from model import *
 from schema import *
 from flask_cors import CORS
 
-info = Info(title="Minha API", version="1.0.0")
+info = Info(title="Fake News Predictor", version="1.0.0")
 app = OpenAPI(__name__, info=info, static_folder="../front", static_url_path="/front")
 CORS(app)
 
