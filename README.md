@@ -12,7 +12,7 @@ Fake News Predictor é uma aplicação capaz de predizer se notícias são verda
     `https://github.com/carlosedcec/fake-news-predictor`
 
 2. Instale as dependências da API:<br>
-    Acesse a pasta "api" e rode o comando `pip install -r requirements`
+    Acesse a pasta "api" e rode o comando `pip install -r requirements.txt`
 
 3. Rode o servidor:<br>
     Ainda na pasta "api" rode o comando `python app.py`
