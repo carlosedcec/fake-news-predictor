@@ -38,23 +38,32 @@ def docs():
 def get_news():
     """Lists all news registered in the database"""
 
-    session = Session()
-    news = session.query(News).all()
+    try:
 
-    if not news:
-        return { "news": [] }, 200
-    else:
-        return {
-            "news": [
-                {
-                    "id": item.id,
-                    "title": item.title,
-                    "text": item.text,
-                    "label": item.label,
-                }
-                for item in news
-            ]
-        }, 200
+        session = Session()
+        news = session.query(News).all()
+
+        if not news:
+            return { "news": [] }, 200
+        else:
+            return {
+                "news": [
+                    {
+                        "id": item.id,
+                        "title": item.title,
+                        "text": item.text,
+                        "label": item.label,
+                    }
+                    for item in news
+                ]
+            }, 200
+
+    except Exception as e:
+        print(str(e))
+        session.rollback()
+        return { "message": "Error trying to get the news on the database" }, 400
+    finally:
+        session.close()
 
 @app.post(
     "/news",
@@ -77,8 +86,6 @@ def save_news_and_predict(form: NewsSchema):
     if not text:
         error_msg = "Text field is required"
         return { "message": error_msg }, 422
-
-    print(text)
 
     if len(text) < 300:
         error_msg = "The news text must be at least 300 characters long"
@@ -117,8 +124,10 @@ def save_news_and_predict(form: NewsSchema):
 
     except Exception as e:
         print(e)
-        error_msg = "Error trying to save the news on the database"
-        return { "message": error_msg }, 400
+        session.rollback()
+        return { "message": "Error trying to save the news on the database" }, 400
+    finally:
+        session.close()
 
 @app.delete(
     "/news/<int:news_id>",
@@ -128,19 +137,28 @@ def save_news_and_predict(form: NewsSchema):
 def delete_news(path: NewsIdSchema):
     """Remove a news from the database using the id"""
 
-    session = Session()
+    try:
 
-    news = (
-        session.query(News)
-        .filter(News.id == path.news_id).first()
-    )
+        session = Session()
 
-    if not news:
-        return { "message": "News item not found in the database" }, 404
-    else:
-        session.delete(news)
-        session.commit()
-        return { "message": "News removed successfully" }, 200
+        news = (
+            session.query(News)
+            .filter(News.id == path.news_id).first()
+        )
+
+        if not news:
+            return { "message": "News item not found in the database" }, 404
+        else:
+            session.delete(news)
+            session.commit()
+            return { "message": "News removed successfully" }, 200
+
+    except Exception as e:
+        print(e)
+        session.rollback()
+        return { "message": "Error trying to delete the news on the database" }, 400
+    finally:
+        session.close()
 
 if __name__ == "__main__":
     app.run(debug=True)
