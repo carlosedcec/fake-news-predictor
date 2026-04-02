@@ -8,8 +8,6 @@ warnings.filterwarnings("ignore")
 
 # Imports gerais
 import re
-import sys
-import csv
 import numpy as np
 import pandas as pd
 from pickle import dump
@@ -185,12 +183,12 @@ kfold = StratifiedKFold(n_splits=NUM_PARTICOES, shuffle=True, random_state=SEED)
 print("Avaliating algorithms...")
 
 # Avaliação dos modelos
-# for name, model in models:
-#     cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING)
-#     names.append(name)
-#     results.append(cv_results)
-#     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-#     print(msg)
+for name, model in models:
+    cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING)
+    names.append(name)
+    results.append(cv_results)
+    msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
+    print(msg)
 
 # ==============================
 # 6. MODEL AVALIATION WITH SCALER
@@ -228,12 +226,12 @@ pipelines.append(('LogisticREG-norm', Pipeline([tfidf, min_max_scaler, logistic_
 print("\nAvaliating algorihtms with scaled data...")
 
 # Executando os pipelines
-# for name, model in pipelines:
-#     cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING, n_jobs=4)
-#     names.append(name)
-#     results.append(cv_results)
-#     msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
-#     print(msg)
+for name, model in pipelines:
+    cv_results = cross_val_score(model, X_train, y_train, cv=kfold, scoring=SCORING, n_jobs=4)
+    names.append(name)
+    results.append(cv_results)
+    msg = "%s: %.3f (%.3f)" % (name, cv_results.mean(), cv_results.std())
+    print(msg)
 
 # ==============================
 # 7. HIPERPARAMETERS OPTIMIZATION
@@ -256,11 +254,11 @@ param_grid = [
     }
 ]
 
-# for name, model in random_forest_pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
-#     grid.fit(X_train, y_train)
-#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
-#     print(msg)
+for name, model in random_forest_pipelines:
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
+    grid.fit(X_train, y_train)
+    msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
+    print(msg)
 
 # Testando otimização de hiperparâmetros da Logistic Regression
 logistic_reg_pipelines = []
@@ -283,11 +281,11 @@ param_grid = [
     }
 ]
 
-# for name, model in logistic_reg_pipelines:
-#     grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
-#     grid.fit(X_train, y_train)
-#     msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
-#     print(msg)
+for name, model in logistic_reg_pipelines:
+    grid = GridSearchCV(estimator=model, param_grid=param_grid, scoring=SCORING, cv=kfold, n_jobs=4)
+    grid.fit(X_train, y_train)
+    msg = "Sem tratamento de missings: %s - Melhor: %f usando %s" % (name, grid.best_score_, grid.best_params_)
+    print(msg)
 
 # ==============================
 # 8. MODEL PREPARATION
@@ -337,7 +335,7 @@ print("Model pipeline dumped!")
 print("\nTesting new data...")
 
 # Carrega csv com dados inteiramente novos
-df = pd.read_csv('../data/testdata/test_data.csv', sep=';', encoding='utf-8-sig')
+df = pd.read_csv('https://raw.githubusercontent.com/carlosedcec/fake-news-predictor/refs/heads/master/api/ml/data/testdata/test_data.csv', sep=';', encoding='utf-8-sig')
 
 # Configura o csv
 df["combined_text"] = df["title"].fillna("") + " " + df["text"].fillna("")
