@@ -23,10 +23,10 @@ def test_modelo_lr():
 
     # Imports the pipeline
     lr_path = './ml/pipelines/fake_news_classification_pipeline_lr.pkl'
-    rf_model = pipeline.carrega_pipeline(lr_path)
+    lr_model = pipeline.carrega_pipeline(lr_path)
 
     # Get the results metrics
-    acuracia_rf = evaluator.evaluate(rf_model, X, y)
+    lr_model = evaluator.evaluate(lr_model, X, y)
     
     # Tests the metrics rate
-    assert acuracia_rf >= 0.75
+    assert lr_model >= 0.75
